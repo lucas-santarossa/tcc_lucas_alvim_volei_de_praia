@@ -2626,6 +2626,28 @@ knn_df %>% gt() %>%
     locations = cells_column_labels())
 
 
+## Comparando todos os modelos estudados ----
+
+df_tds_metodos2 <- data.frame(rbind(cbind('Masculino','Acurácia',format(round(mean(avgs_bck_model),digits = 3), nsmall=3), format(round(model_performance.masc.bck[1,3][[1]], digits=3), nsmall=3), format(round(cm_masc$overall["Accuracy"], digits = 3), nsmall=3)),
+                                    cbind('Masculino', 'Sensibilidade', format(round(mean(sens_full_model_masc),digits = 3), nsmall=3), format(round(model_performance.masc.bck[2,3][[1]], digits=3), nsmall=3), format(round(cm_masc$byClass["Sensitivity"], digits = 3), nsmall=3)),
+                                    cbind('Masculino', 'Especificidade', format(round(mean(spec_full_model_masc),digits = 3), nsmall=3), format(round(model_performance.masc.bck[3,3][[1]], digits=3), nsmall=3), format(round(cm_masc$byClass["Specificity"], digits = 3), nsmall=3)),
+                                    cbind('Feminino','Acurácia',format(round(mean(avgs_bck_model_fem),digits = 3), nsmall=3), format(round(model_performance.fem.bck[1,3][[1]], digits=3), nsmall=3), format(round(cm_fem$overall["Accuracy"], digits = 3), nsmall=3)),
+                                    cbind('Feminino', 'Sensibilidade', format(round(mean(sens_full_model_fem),digits = 3), nsmall=3), format(round(model_performance.fem.bck[2,3][[1]], digits=3), nsmall=3), format(round(cm_fem$byClass["Sensitivity"], digits = 3), nsmall=3)),
+                                    cbind('Feminino', 'Especificidade', format(round(mean(spec_full_model_fem),digits = 3), nsmall=3), format(round(model_performance.fem.bck[3,3][[1]], digits=3), nsmall=3), format(round(cm_fem$byClass["Specificity"], digits = 3), nsmall=3)))
+)
+
+rownames(df_tds_metodos2) <- NULL
+colnames(df_tds_metodos2) <- c('Gênero', 'Medida', 'Regressão Logística', 'Árvore de Decisão', 'KNN')
+
+
+df_tds_metodos2 %>% gt(groupname_col = 'Gênero', row_group_as_column = TRUE) %>%
+  tab_style(
+    style = list(cell_text(weight = 'bold')),
+    locations = cells_row_groups( groups= everything())) %>%
+  tab_style(
+    style = list(cell_text(weight = 'bold')),
+    locations = cells_column_labels())
+
 # Análise Exploratória ----
 
 ## Fazendo os mesmos procedimentos para FIVB ----
