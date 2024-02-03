@@ -2465,29 +2465,65 @@ boxplot(t(avgs_bck_model_fem))
 
 # MASCULINO
 
-# Criando o modelo da árvore
-tree_spec <- decision_tree() %>%
-  set_engine("rpart") %>%
-  set_mode("classification")
+acur_arvore_masc <- c()
+sens_arvore_masc <- c()
+spec_arvore_masc <- c()
 
+for(r in 1:20){
+  
+  training.samples <- var_selec_masc$dupla_de_referencia %>%
+    createDataPartition(p = 0.8, list = FALSE)
+  train.data  <- var_selec_masc[training.samples, ]
+  test.data <- var_selec_masc[-training.samples, ]
+  
+  train.masc.bck <- train.data
+  test.masc.bck <- test.data
 
-# Ajustando o modelo
-tree_fit.masc.bck <- tree_spec %>%
-  fit(dupla_de_referencia ~ ., data = train.masc.bck)
+  # Criando o modelo da árvore
+  tree_spec <- decision_tree() %>%
+    set_engine("rpart") %>%
+    set_mode("classification")
+  
+  
+  # Ajustando o modelo
+  tree_fit.masc.bck <- tree_spec %>%
+    fit(dupla_de_referencia ~ ., data = train.masc.bck)
+  
+  
+  
+  # Fazendo previsões com árvore de decisão
+  predictions <- tree_fit.masc.bck %>%
+    predict(test.masc.bck) %>%
+    pull(.pred_class)
+  
+  
+  # Medidas de acurácia
+  metrics <- metric_set(accuracy, sensitivity, specificity, kap)
+  model_performance.masc.bck <- test.masc.bck %>%
+    mutate(predictions = predictions) %>%
+    metrics(truth = dupla_de_referencia, estimate = predictions)
+  
+  cm_arv_masc <- confusionMatrix(predictions, test.masc.bck$dupla_de_referencia, positive = 'W')
+  
+  if(length(acur_arvore_masc) == 0){
+    acur_arvore_masc <- cm_arv_masc$overall["Accuracy"]
+  } else{
+    acur_arvore_masc <- cbind(acur_arvore_masc, cm_arv_masc$overall["Accuracy"])
+  }
+  
+  if(length(sens_arvore_masc) == 0){
+    sens_arvore_masc <- cm_arv_masc$byClass["Sensitivity"]
+  } else{
+    sens_arvore_masc <- cbind(sens_arvore_masc, cm_arv_masc$byClass["Sensitivity"])
+  }
+  
+  if(length(spec_arvore_masc) == 0){
+    spec_arvore_masc <- cm_arv_masc$byClass["Specificity"]
+  } else{
+    spec_arvore_masc <- cbind(spec_arvore_masc, cm_arv_masc$byClass["Specificity"])
+  }
 
-
-
-# Fazendo previsões com árvore de decisão
-predictions <- tree_fit.masc.bck %>%
-  predict(test.masc.bck) %>%
-  pull(.pred_class)
-
-
-# Medidas de acurácia
-metrics <- metric_set(accuracy, sensitivity, specificity, kap)
-model_performance.masc.bck <- test.masc.bck %>%
-  mutate(predictions = predictions) %>%
-  metrics(truth = dupla_de_referencia, estimate = predictions)
+}
 
 confusionMatrix(predictions, test.masc.bck$dupla_de_referencia, positive = 'W')
 print(model_performance.masc.bck)
@@ -2506,32 +2542,66 @@ print(var_importance.masc.bck)
 
 # FEMININO
 
-# Criando o modelo da árvore
-tree_spec <- decision_tree() %>%
-  set_engine("rpart") %>%
-  set_mode("classification")
+acur_arvore_fem <- c()
+sens_arvore_fem <- c()
+spec_arvore_fem <- c()
 
+for(r in 1:20){
+  
+  training.samples <- var_selec_fem$dupla_de_referencia %>%
+    createDataPartition(p = 0.8, list = FALSE)
+  train.data  <- var_selec_fem[training.samples,-26 ]
+  test.data <- var_selec_fem[-training.samples, -26]
+  
+  train.fem.bck <- train.data
+  test.fem.bck <- test.data
+  
 
-# Ajustando o modelo
-tree_fit.fem.bck <- tree_spec %>%
-  fit(dupla_de_referencia ~ ., data = train.fem.bck)
+  # Criando o modelo da árvore
+  tree_spec <- decision_tree() %>%
+    set_engine("rpart") %>%
+    set_mode("classification")
+  
+  
+  # Ajustando o modelo
+  tree_fit.fem.bck <- tree_spec %>%
+    fit(dupla_de_referencia ~ ., data = train.fem.bck)
+  
+  
+  # Fazendo previsões com árvore de decisão
+  predictions <- tree_fit.fem.bck %>%
+    predict(test.fem.bck) %>%
+    pull(.pred_class)
+  
+  
+  # Medidas de acurácia
+  metrics <- metric_set(accuracy, sensitivity, specificity, kap)
+  model_performance.fem.bck <- test.fem.bck %>%
+    mutate(predictions = predictions) %>%
+    metrics(truth = dupla_de_referencia, estimate = predictions)
+  
+  cm_arv_fem <- confusionMatrix(predictions, test.fem.bck$dupla_de_referencia, positive = 'W')
+  
+  if(length(acur_arvore_fem) == 0){
+    acur_arvore_fem <- cm_arv_fem$overall["Accuracy"]
+  } else{
+    acur_arvore_fem <- cbind(acur_arvore_fem, cm_arv_fem$overall["Accuracy"])
+  }
+  
+  if(length(sens_arvore_fem) == 0){
+    sens_arvore_fem <- cm_arv_fem$byClass["Sensitivity"]
+  } else{
+    sens_arvore_fem <- cbind(sens_arvore_fem, cm_arv_fem$byClass["Sensitivity"])
+  }
+  
+  if(length(spec_arvore_fem) == 0){
+    spec_arvore_fem <- cm_arv_fem$byClass["Specificity"]
+  } else{
+    spec_arvore_fem <- cbind(spec_arvore_fem, cm_arv_fem$byClass["Specificity"])
+  }
 
+}
 
-# Fazendo previsões com árvore de decisão
-predictions <- tree_fit.fem.bck %>%
-  predict(test.fem.bck) %>%
-  pull(.pred_class)
-
-
-# Medidas de acurácia
-metrics <- metric_set(accuracy, sensitivity, specificity, kap)
-model_performance.fem.bck <- test.fem.bck %>%
-  mutate(predictions = predictions) %>%
-  metrics(truth = dupla_de_referencia, estimate = predictions)
-
-confusionMatrix(predictions, test.fem.bck$dupla_de_referencia, positive = 'W')
-
-print(model_performance.fem.bck)
 
 # Plotando a árvore de decisão
 tree_plot.fem.bck <-rpart.plot(tree_fit.fem.bck$fit, type = 4, digits = 3,extra = 101, under = TRUE, cex = 0.55, box.palette = "auto", roundin=F)
@@ -2546,74 +2616,224 @@ print(var_importance.fem.bck)
 
 
 
-### KNN ----
+# Boxplots
 
-# Masculino
+masc_arv_prev <- as.data.frame(cbind('Masculino', t(acur_arvore_masc)))
+fem_arv_prev <- as.data.frame(cbind('Feminino', t(acur_arvore_fem)))
 
-preProcValues <- preProcess(train.masc.bck, method = c("center", "scale"))
-trainTransformed <- predict(preProcValues, train.masc.bck)
-testTransformed <- predict(preProcValues, test.masc.bck)
+previsoes_arv <- rbind(masc_arv_prev, fem_arv_prev)
 
-knnModel <- train(
-  dupla_de_referencia ~ ., 
-  data = trainTransformed, 
-  method = "knn", 
-  trControl = trainControl(method = "cv"), 
-  tuneGrid = data.frame(k = c(3,5,7,10,13,16,18,20))
-)
+previsoes_arv$Accuracy <- as.numeric(previsoes_arv$Accuracy)
 
-k_masc <- knnModel$bestTune$k
+colnames(previsoes_arv) <- c('Modelo', 'Acurácia')
 
-best_model<- knn3(
-  dupla_de_referencia ~ .,
-  data = trainTransformed,
-  k = k_masc
-)
-
-
-predictions <- predict(best_model, testTransformed,type = "class")
-
-# Matriz de Confusão
-cm_masc <- confusionMatrix(predictions, testTransformed$dupla_de_referencia, positive = 'W')
-cm_masc
-
-
-# FEMININO
-
-preProcValues <- preProcess(train.fem.bck, method = c("center", "scale"))
-trainTransformed <- predict(preProcValues, train.fem.bck)
-testTransformed <- predict(preProcValues, test.fem.bck)
-
-knnModel <- train(
-  dupla_de_referencia ~ ., 
-  data = trainTransformed, 
-  method = "knn", 
-  trControl = trainControl(method = "cv"), 
-  tuneGrid = data.frame(k = c(3,5,7,10,13,16,18,20))
-)
-
-k_fem <- knnModel$bestTune$k
-
-best_model<- knn3(
-  dupla_de_referencia ~ .,
-  data = trainTransformed,
-  k = k_fem
-)
-
-predictions <- predict(best_model, testTransformed,type = "class")
-
-# Matriz de confusão
-cm_fem <- confusionMatrix(predictions, testTransformed$dupla_de_referencia, positive = 'W')
-cm_fem
+ggplot(previsoes_arv, aes(x = Modelo, y = Acurácia, fill = Modelo)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme_classic(base_size=16.5)
 
 
 # Juntando masculino e feminino
 
+arvore_df <- data.frame(Gênero = rbind("Masculino", "Feminino"),
+                        Acurácia = rbind(format(round(mean(acur_arvore_masc), digits = 3), nsmall=3),format(round(mean(acur_arvore_fem), digits=3), nsmall=3)),
+                        Sensitividade = rbind(format(round(mean(sens_arvore_masc), digits = 3), nsmall=3),format(round(mean(sens_arvore_fem), digits=3), nsmall=3)),
+                        Especificidade = rbind(format(round(mean(spec_arvore_masc), digits=3), nsmall=3), format(round(mean(spec_arvore_fem), digits=3), nsmall=3)))
+
+colnames(arvore_df) <- c('Gênero', 'Acurácia', 'Sensibilidade', 'Especificidade')
+
+arvore_df %>% gt() %>%
+  tab_style(
+    style = list(cell_text(weight = 'bold')),
+    locations = cells_body(columns = Gênero)) %>%
+  tab_style(
+    style = list(cell_text(weight = 'bold')),
+    locations = cells_column_labels())
+
+
+
+
+
+### KNN ----
+
+# Masculino
+
+
+acur_knn_masc <- c()
+sens_knn_masc <- c()
+spec_knn_masc <- c()
+k_best_masc <- c()
+
+for(r in 1:20){
+  
+  print(r)
+  
+  training.samples <- var_selec_masc$dupla_de_referencia %>%
+    createDataPartition(p = 0.8, list = FALSE)
+  train.data  <- var_selec_masc[training.samples, ]
+  test.data <- var_selec_masc[-training.samples, ]
+  
+  train.masc.bck <- train.data
+  test.masc.bck <- test.data
+  
+
+  preProcValues <- preProcess(train.masc.bck, method = c("center", "scale"))
+  trainTransformed <- predict(preProcValues, train.masc.bck)
+  testTransformed <- predict(preProcValues, test.masc.bck)
+  
+  knnModel <- train(
+    dupla_de_referencia ~ ., 
+    data = trainTransformed, 
+    method = "knn", 
+    trControl = trainControl(method = "cv"), 
+    tuneGrid = data.frame(k = c(3,5,7,10,13,16,18,20))
+  )
+  
+  k_masc <- knnModel$bestTune$k
+  
+  best_model<- knn3(
+    dupla_de_referencia ~ .,
+    data = trainTransformed,
+    k = k_masc
+  )
+  
+  
+  predictions <- predict(best_model, testTransformed,type = "class")
+  
+  # Matriz de Confusão
+  cm_masc <- confusionMatrix(predictions, testTransformed$dupla_de_referencia, positive = 'W')
+  
+  
+  if(length(acur_knn_masc) == 0){
+    acur_knn_masc <- cm_masc$overall["Accuracy"]
+  } else{
+    acur_knn_masc <- cbind(acur_knn_masc, cm_masc$overall["Accuracy"])
+  }
+  
+  if(length(sens_knn_masc) == 0){
+    sens_knn_masc <- cm_masc$byClass["Sensitivity"]
+  } else{
+    sens_knn_masc <- cbind(sens_knn_masc, cm_masc$byClass["Sensitivity"])
+  }
+  
+  if(length(spec_knn_masc) == 0){
+    spec_knn_masc <- cm_masc$byClass["Specificity"]
+  } else{
+    spec_knn_masc <- cbind(spec_knn_masc, cm_masc$byClass["Specificity"])
+  }
+  
+  if(length(k_best_masc) == 0){
+    k_best_masc <- k_masc
+  } else{
+    k_best_masc <- cbind(k_best_masc, k_masc)
+  }
+
+}
+
+k_best_masc_grp <- data.frame(table(k_best_masc))
+k_max_masc <- k_best_masc_grp[which.max(k_best_masc_grp$Freq), "k_best_masc"]
+k_tab_masc <- paste(k_max_masc[1], ' (',100*(max(k_best_masc_grp$Freq)/20), '%)', sep='')
+
+
+
+
+# FEMININO
+
+acur_knn_fem <- c()
+sens_knn_fem <- c()
+spec_knn_fem <- c()
+k_best_fem <- c()
+
+for(r in 1:20){
+  
+  print(r)
+  
+  training.samples <- var_selec_fem$dupla_de_referencia %>%
+    createDataPartition(p = 0.8, list = FALSE)
+  train.data  <- var_selec_fem[training.samples,-26 ]
+  test.data <- var_selec_fem[-training.samples, -26]
+  
+  train.fem.bck <- train.data
+  test.fem.bck <- test.data
+
+  preProcValues <- preProcess(train.fem.bck, method = c("center", "scale"))
+  trainTransformed <- predict(preProcValues, train.fem.bck)
+  testTransformed <- predict(preProcValues, test.fem.bck)
+  
+  knnModel <- train(
+    dupla_de_referencia ~ ., 
+    data = trainTransformed, 
+    method = "knn", 
+    trControl = trainControl(method = "cv"), 
+    tuneGrid = data.frame(k = c(3,5,7,10,13,16,18,20))
+  )
+  
+  k_fem <- knnModel$bestTune$k
+  
+  best_model<- knn3(
+    dupla_de_referencia ~ .,
+    data = trainTransformed,
+    k = k_fem
+  )
+  
+  predictions <- predict(best_model, testTransformed,type = "class")
+  
+  # Matriz de confusão
+  cm_fem <- confusionMatrix(predictions, testTransformed$dupla_de_referencia, positive = 'W')
+  
+  if(length(acur_knn_fem) == 0){
+    acur_knn_fem <- cm_fem$overall["Accuracy"]
+  } else{
+    acur_knn_fem <- cbind(acur_knn_fem, cm_fem$overall["Accuracy"])
+  }
+  
+  if(length(sens_knn_fem) == 0){
+    sens_knn_fem <- cm_fem$byClass["Sensitivity"]
+  } else{
+    sens_knn_fem <- cbind(sens_knn_fem, cm_fem$byClass["Sensitivity"])
+  }
+  
+  if(length(spec_knn_fem) == 0){
+    spec_knn_fem <- cm_fem$byClass["Specificity"]
+  } else{
+    spec_knn_fem <- cbind(spec_knn_fem, cm_fem$byClass["Specificity"])
+  }
+  
+  if(length(k_best_fem) == 0){
+    k_best_fem <- k_fem
+  } else{
+    k_best_fem <- cbind(k_best_fem, k_fem)
+  }
+
+}
+
+# Boxplots
+
+masc_knn_prev <- as.data.frame(cbind('Masculino', t(acur_knn_masc)))
+fem_knn_prev <- as.data.frame(cbind('Feminino', t(acur_knn_fem)))
+
+previsoes_knn <- rbind(masc_knn_prev, fem_knn_prev)
+
+previsoes_knn$Accuracy <- as.numeric(previsoes_knn$Accuracy)
+
+colnames(previsoes_knn) <- c('Modelo', 'Acurácia')
+
+ggplot(previsoes_knn, aes(x = Modelo, y = Acurácia, fill = Modelo)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme_classic(base_size=16.5)
+
+
+
+# Juntando masculino e feminino
+
+# Juntando masculino e feminino
+
 knn_df <- data.frame(Gênero = rbind("Masculino", "Feminino"),
-                     `K ótimo` = rbind(k_masc, k_fem),
-                     Acurácia = rbind(format(round(cm_masc$overall["Accuracy"], digits = 3), nsmall=3),format(round(cm_fem$overall["Accuracy"], digits=3), nsmall=3)),
-                     Sensitividade = rbind(format(round(cm_masc$byClass["Sensitivity"], digits = 3), nsmall=3),format(round(cm_fem$byClass["Sensitivity"], digits=3), nsmall=3)),
-                     Especificidade = rbind(format(round(cm_masc$byClass["Specificity"], digits=3), nsmall=3), format(round(cm_fem$byClass["Specificity"], digits=3), nsmall=3)))
+                     `K ótimo` = rbind(k_tab_masc, k_tab_fem),
+                     Acurácia = rbind(format(round(mean(acur_knn_masc), digits = 3), nsmall=3),format(round(mean(acur_knn_fem), digits=3), nsmall=3)),
+                     Sensitividade = rbind(format(round(mean(sens_knn_masc), digits = 3), nsmall=3),format(round(mean(sens_knn_fem), digits=3), nsmall=3)),
+                     Especificidade = rbind(format(round(mean(spec_knn_masc), digits=3), nsmall=3), format(round(mean(spec_knn_fem), digits=3), nsmall=3)))
 
 colnames(knn_df) <- c('Gênero', 'K ótimo', 'Acurácia', 'Sensibilidade', 'Especificidade')
 
@@ -2628,12 +2848,12 @@ knn_df %>% gt() %>%
 
 ## Comparando todos os modelos estudados ----
 
-df_tds_metodos2 <- data.frame(rbind(cbind('Masculino','Acurácia',format(round(mean(avgs_bck_model),digits = 3), nsmall=3), format(round(model_performance.masc.bck[1,3][[1]], digits=3), nsmall=3), format(round(cm_masc$overall["Accuracy"], digits = 3), nsmall=3)),
-                                    cbind('Masculino', 'Sensibilidade', format(round(mean(sens_full_model_masc),digits = 3), nsmall=3), format(round(model_performance.masc.bck[2,3][[1]], digits=3), nsmall=3), format(round(cm_masc$byClass["Sensitivity"], digits = 3), nsmall=3)),
-                                    cbind('Masculino', 'Especificidade', format(round(mean(spec_full_model_masc),digits = 3), nsmall=3), format(round(model_performance.masc.bck[3,3][[1]], digits=3), nsmall=3), format(round(cm_masc$byClass["Specificity"], digits = 3), nsmall=3)),
-                                    cbind('Feminino','Acurácia',format(round(mean(avgs_bck_model_fem),digits = 3), nsmall=3), format(round(model_performance.fem.bck[1,3][[1]], digits=3), nsmall=3), format(round(cm_fem$overall["Accuracy"], digits = 3), nsmall=3)),
-                                    cbind('Feminino', 'Sensibilidade', format(round(mean(sens_full_model_fem),digits = 3), nsmall=3), format(round(model_performance.fem.bck[2,3][[1]], digits=3), nsmall=3), format(round(cm_fem$byClass["Sensitivity"], digits = 3), nsmall=3)),
-                                    cbind('Feminino', 'Especificidade', format(round(mean(spec_full_model_fem),digits = 3), nsmall=3), format(round(model_performance.fem.bck[3,3][[1]], digits=3), nsmall=3), format(round(cm_fem$byClass["Specificity"], digits = 3), nsmall=3)))
+df_tds_metodos2 <- data.frame(rbind(cbind('Masculino','Acurácia',format(round(mean(avgs_bck_model),digits = 3), nsmall=3), format(round(mean(acur_arvore_masc), digits=3), nsmall=3), format(round(mean(acur_knn_masc), digits = 3), nsmall=3)),
+                                    cbind('Masculino', 'Sensibilidade', format(round(mean(sens_full_model_masc),digits = 3), nsmall=3), format(round(mean(sens_arvore_masc), digits=3), nsmall=3), format(round(mean(sens_knn_masc), digits = 3), nsmall=3)),
+                                    cbind('Masculino', 'Especificidade', format(round(mean(spec_full_model_masc),digits = 3), nsmall=3), format(round(mean(spec_arvore_masc), digits=3), nsmall=3), format(round(mean(spec_knn_masc), digits = 3), nsmall=3)),
+                                    cbind('Feminino','Acurácia',format(round(mean(avgs_bck_model_fem),digits = 3), nsmall=3), format(round(mean(acur_arvore_fem), digits=3), nsmall=3), format(round(mean(acur_knn_fem), digits = 3), nsmall=3)),
+                                    cbind('Feminino', 'Sensibilidade', format(round(mean(sens_full_model_fem),digits = 3), nsmall=3), format(round(mean(sens_arvore_fem), digits=3), nsmall=3), format(round(mean(sens_knn_fem), digits = 3), nsmall=3)),
+                                    cbind('Feminino', 'Especificidade', format(round(mean(spec_full_model_fem),digits = 3), nsmall=3), format(round(mean(spec_arvore_fem), digits=3), nsmall=3), format(round(mean(spec_knn_fem), digits = 3), nsmall=3)))
 )
 
 rownames(df_tds_metodos2) <- NULL
@@ -2647,6 +2867,9 @@ df_tds_metodos2 %>% gt(groupname_col = 'Gênero', row_group_as_column = TRUE) %>
   tab_style(
     style = list(cell_text(weight = 'bold')),
     locations = cells_column_labels())
+
+
+
 
 # Análise Exploratória ----
 
