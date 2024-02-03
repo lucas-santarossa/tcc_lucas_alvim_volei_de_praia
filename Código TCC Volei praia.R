@@ -377,7 +377,7 @@ dados_sem_na$w_rank <- as.integer(dados_sem_na$w_rank)
 dados_fivb_sem_na <- dados_sem_na[which(dados_sem_na$circuit == 'FIVB'),]
 dados_avp_sem_na <- dados_sem_na[which(dados_sem_na$circuit == 'AVP'),]
 
-## Somente AVP - TALVEZ REMOVER DEPOIS ----
+## Somente AVP ----
 dados_sem_na <- dados_avp_sem_na
 
 
