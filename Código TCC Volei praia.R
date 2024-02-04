@@ -2866,6 +2866,17 @@ df_tds_metodos2 %>% gt(groupname_col = 'Gênero', row_group_as_column = TRUE) %>
     locations = cells_row_groups( groups= everything())) %>%
   tab_style(
     style = list(cell_text(weight = 'bold')),
+    locations = lapply(
+      1:nrow(df_tds_metodos2),
+      FUN = 
+        function(rowNumber){
+          cells_body(columns = which.max(df_tds_metodos2[rowNumber, ]),
+                     rows = rowNumber)
+        }
+    ) 
+  ) %>%
+  tab_style(
+    style = list(cell_text(weight = 'bold')),
     locations = cells_column_labels())
 
 
